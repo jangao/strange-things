@@ -30,7 +30,7 @@ function main(config) {
     return config;
   }
   const { selectGroup, autoSelectGroup } = findRegionProxyGroups(config);
-  const allProxyGroup = findAllProxyGroup(config, autoSelectGroup)
+  const allProxyGroup = findAllProxyGroup(config, autoSelectGroup, false)
 
   config['proxy-groups'] = [...allProxyGroup, ...selectGroup, ...autoSelectGroup]
   config['rules'] = []
@@ -40,10 +40,10 @@ function main(config) {
 /**
  * 获取全部节点的代理组
  */
-function findAllProxyGroup(config, proxyGroup) {
+function findAllProxyGroup(config, proxyGroup, containProxy) {
   const proxy_names = config.proxies.map(proxy => proxy.name);
   const addProxyGroup = (proxyGroup && proxyGroup.map(g => g.name)) || []
-  const select_proxy_names = ["自动选择", ...addProxyGroup, ...proxy_names]
+  const select_proxy_names = containProxy ? ["自动选择", ...addProxyGroup, ...proxy_names] : ["自动选择", ...addProxyGroup]
   const select = { name: "节点选择", type: "select", proxies: select_proxy_names }
   const url_test = { name: "自动选择", type: "url-test", proxies: proxy_names, url: 'http://www.gstatic.com/generate_204', interval: 86400 }
   const fallback = { name: "故障转移", type: "fallback", proxies: proxy_names, url: 'http://www.gstatic.com/generate_204', interval: 7200 }
