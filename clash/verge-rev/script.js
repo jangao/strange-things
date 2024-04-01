@@ -1,5 +1,5 @@
-// 全局配置组名的映射名称
-const groupNameMapping = { "日本": "小日子", "Japan": "小日子" }
+// 全局配置组名的映射名称 key为正则的字符串 value为替换的值
+const groupNameMapping = { "日本|Japan": "小日子" }
 function main(config) {
   if (!config.dns) {
     config.dns = {}
@@ -29,10 +29,10 @@ function main(config) {
   if (!config.proxies) {
     return config;
   }
-  const allProxyGroup = findAllProxyGroup(config);
-  const regionProxyGroup = findRegionProxyGroups(config);
+  const { selectGroup, autoSelectGroup } = findRegionProxyGroups(config);
+  const allProxyGroup = findAllProxyGroup(config, autoSelectGroup)
 
-  config['proxy-groups'] = [...allProxyGroup, ...regionProxyGroup]
+  config['proxy-groups'] = [...allProxyGroup, ...selectGroup, ...autoSelectGroup]
   config['rules'] = []
   return config;
 }
@@ -40,9 +40,10 @@ function main(config) {
 /**
  * 获取全部节点的代理组
  */
-function findAllProxyGroup(config) {
+function findAllProxyGroup(config, proxyGroup) {
   const proxy_names = config.proxies.map(proxy => proxy.name);
-  const select_proxy_names = ["自动选择", ...proxy_names]
+  const addProxyGroup = (proxyGroup && proxyGroup.map(g => g.name)) || []
+  const select_proxy_names = ["自动选择", ...addProxyGroup, ...proxy_names]
   const select = { name: "节点选择", type: "select", proxies: select_proxy_names }
   const url_test = { name: "自动选择", type: "url-test", proxies: proxy_names, url: 'http://www.gstatic.com/generate_204', interval: 86400 }
   const fallback = { name: "故障转移", type: "fallback", proxies: proxy_names, url: 'http://www.gstatic.com/generate_204', interval: 7200 }
@@ -59,7 +60,9 @@ function findRegionProxyGroups(config, minProxyCount = 5) {
   }
   const proxyGroups = config.proxies.map(proxy => proxy.name)
     .reduce((groups, item) => {
-      let groupName = item.replace(/^[\d\-\s]+|[\d\-\s]+$/g, '');
+      //去除末尾和开头的数字和其他字符
+      let groupName = item.replace(/(?:\d+|[\s-]+\d+|\s+[Vv]+\d+)$/g, '')
+        .replace(/^(?:\d+[\s-]+|\d+|[Vv]+\d+\s+)/g, '');
       let proxyNames = groups[groupName] || [];
       groups[groupName] = [...proxyNames, item];
       return groups;
@@ -80,15 +83,22 @@ function findRegionProxyGroups(config, minProxyCount = 5) {
     proxySelectGroup.push(selectGroup);
     proxyAutoSelectGroup.push(autoSelectGroup);
   }
-  return [...proxySelectGroup, ...proxyAutoSelectGroup]
+  return { selectGroup: proxySelectGroup, autoSelectGroup: proxyAutoSelectGroup }
 }
 
 /**
  * 根据节点组名称和节点名称列表转换成节点组列表
  */
 function toGroupByProxyNames(groupName, proxyNames) {
-  let realGroupName = groupNameMapping[groupName] || groupName;
-  const autoSelectGroupName = realGroupName + "自动";
+  let realGroupName = groupName;
+  for (const nameRegex in groupNameMapping) {
+    let matchName = RegExp(nameRegex).test(groupName);
+    if (matchName) {
+      realGroupName = groupNameMapping[nameRegex];
+      break;
+    }
+  }
+  const autoSelectGroupName = "自动选择-" + realGroupName;
   const selectProxyName = [autoSelectGroupName, ...proxyNames]
   const selectGroup = { name: realGroupName, type: "select", proxies: selectProxyName }
   const autoSelectGroup = { name: autoSelectGroupName, type: "url-test", proxies: proxyNames, url: 'http://www.gstatic.com/generate_204', interval: 86400 }
