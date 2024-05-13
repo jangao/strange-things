@@ -1,25 +1,22 @@
+# since v1.6.2
 # Merge Template for clash verge
 # The `Merge` format used to enhance profile
 
 # prepend-rules:
 
-# prepend-rule-providers:
+# rule-providers:
 
-prepend-proxies:
+# prepend-proxies:
 
-prepend-proxy-providers:
+# proxy-providers:
 
-prepend-proxy-groups:
+# prepend-proxy-groups:
 
-append-rules:
+# append-rules:
 
-append-rule-providers:
+# append-proxies:
 
-append-proxies:
-
-append-proxy-providers:
-
-append-proxy-groups:
+# append-proxy-groups:
 
 prepend-rules:
   - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
@@ -51,7 +48,7 @@ prepend-rules:
   - GEOIP,CN,DIRECT
   - MATCH,节点选择
 
-prepend-rule-providers:
+rule-providers:
   Global:
     type: http
     behavior: classical
