@@ -46,7 +46,7 @@ prepend-rules:
   - RULE-SET,direct,DIRECT
   - RULE-SET,lancidr,DIRECT
   - RULE-SET,cncidr,DIRECT
-  - RULE-SET,openapi,小日子
+  - RULE-SET,openai,小日子
   - RULE-SET,proxy,节点选择
   - RULE-SET,telegramcidr,节点选择
   - GEOIP,LAN,DIRECT
