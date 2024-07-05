@@ -1,32 +1,67 @@
-// 全局配置组名的映射名称 key为正则的字符串 value为替换的值
+// gloabl regex group name replace
 const groupNameMapping = { "日本|Japan": "小日子" };
+const groupNameRemoveRegexs = [/\[trojan\]\s+/g]
+const groupNameSplitConfig = [
+  { delimiter: "-", index: 0 },
+  { delimiter: " ", index: 0 },
+];
+
+// split group name by area , for custom function
+const findGroupName = (groupName) => {
+  if (!groupName) {
+    return groupName;
+  }
+  groupNameRemoveRegexs.forEach(regex => {
+    groupName = groupName.replace(regex, "")
+  })
+  groupName = groupName
+    .replace(/(?:\d+|[\s-]+\d+|\s+[Vv]+\d+)$/g, "")
+    .replace(/^(?:\d+[\s-]+|\d+|[Vv]+\d+\s+)/g, "");
+  let sc = groupNameSplitConfig.find(x => groupName.includes(x.delimiter))
+  if (sc) {
+    return groupName.split(sc.delimiter)[sc.index];
+  }
+  return groupName;
+}
+// github or cnd
+const ruleProvidersUrlSrc = "github"
+const ruleProvidersUrl = {
+  "github": {
+    "Global": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Global/Global.yaml",
+    "Global_Domain": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Global/Global_Domain.txt",
+    "ChinaMax_No_Resolve": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ChinaMax/ChinaMax_No_Resolve.yaml",
+    "ChinaMax": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ChinaMax/ChinaMax.yaml",
+    "ChinaMax_Domain": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ChinaMax/ChinaMax_Domain.txt",
+    "ChinaMax_IP": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ChinaMax/ChinaMax_IP.txt",
+    "OpenAI": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/OpenAI/OpenAI.yaml"
+  },
+  "cdn": {
+    "Global": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Global/Global.yaml",
+    "Global_Domain": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Global/Global_Domain.txt",
+    "ChinaMax_No_Resolve": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/ChinaMax/ChinaMax_No_Resolve.yaml",
+    "ChinaMax": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/ChinaMax/ChinaMax.yaml",
+    "ChinaMax_Domain": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/ChinaMax/ChinaMax_Domain.txt",
+    "ChinaMax_IP": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/ChinaMax/ChinaMax_IP.yaml",
+    "OpenAI": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/OpenAI/OpenAI.yaml"
+  }
+}
+
+const realRuleProvidersUrl = ruleProvidersUrl[ruleProvidersUrlSrc]
+
 const ruleAndProviders = {
   "rules": [
-    "IP-CIDR,192.168.0.0/16,DIRECT,no-resolve",
-    "IP-CIDR,10.0.0.0/8,DIRECT,no-resolve",
-    "IP-CIDR,172.16.0.0/12,DIRECT,no-resolve",
-    "IP-CIDR,127.0.0.0/8,DIRECT,no-resolve",
-    "IP-CIDR,100.64.0.0/10,DIRECT,no-resolve",
-    "IP-CIDR6,::1/128,DIRECT,no-resolve",
-    "IP-CIDR6,fc00::/7,DIRECT,no-resolve",
-    "IP-CIDR6,fe80::/10,DIRECT,no-resolve",
-    "IP-CIDR6,fd00::/8,DIRECT,no-resolve",
-    "DOMAIN,download-cdn.jetbrains.com,DIRECT",
-    "DOMAIN-SUFFIX,dingteam.com,DIRECT,no-resolve",
-    "DOMAIN-SUFFIX,dingtalk.com,DIRECT,no-resolve",
-    "DOMAIN-SUFFIX,aliyun.com,DIRECT",
-    "DOMAIN-SUFFIX,aliyuncs.com,DIRECT",
     "DOMAIN-SUFFIX,microsoft.com,DIRECT",
     "DOMAIN-SUFFIX,msn.com,DIRECT",
     "DOMAIN-SUFFIX,msn.cn,DIRECT",
     "DOMAIN-SUFFIX,live.com,DIRECT",
     "DOMAIN-SUFFIX,cdntips.net,DIRECT",
+    "RULE-SET,ChinaMax,DIRECT",
+    "RULE-SET,ChinaMax_No_Resolve,DIRECT,no-resolve",
+    "RULE-SET,ChinaMax_Domain,DIRECT,no-resolve",
+    "RULE-SET,ChinaMax_IP,DIRECT",
     "RULE-SET,OpenAI,小日子",
     "RULE-SET,Global,节点选择",
     "RULE-SET,Global_Domain,节点选择",
-    "RULE-SET,ChinaMax,DIRECT",
-    "RULE-SET,ChinaMax_Domain,DIRECT",
-    "RULE-SET,ChinaMax_IP,DIRECT",
     "GEOIP,LAN,DIRECT",
     "GEOIP,CN,DIRECT",
     "MATCH,节点选择"
@@ -36,7 +71,7 @@ const ruleAndProviders = {
       "type": "http",
       "behavior": "classical",
       "format": "yaml",
-      "url": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Global/Global.yaml",
+      "url": `${realRuleProvidersUrl['Global']}`,
       "path": "./rules/Global.yaml",
       "interval": 86400
     },
@@ -44,7 +79,7 @@ const ruleAndProviders = {
       "type": "http",
       "behavior": "domain",
       "format": "yaml",
-      "url": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Global/Global_Domain.yaml",
+      "url": `${realRuleProvidersUrl['Global_Domain']}`,
       "path": "./rules/Global_Domain.yaml",
       "interval": 86400
     },
@@ -52,7 +87,7 @@ const ruleAndProviders = {
       "type": "http",
       "behavior": "domain",
       "format": "yaml",
-      "url": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Global/ChinaMax_No_Resolve.yaml",
+      "url": `${realRuleProvidersUrl['ChinaMax_No_Resolve']}`,
       "path": "./rules/ChinaMax_No_Resolve.yaml",
       "interval": 86400
     },
@@ -60,7 +95,7 @@ const ruleAndProviders = {
       "type": "http",
       "behavior": "classical",
       "format": "yaml",
-      "url": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/ChinaMax/ChinaMax.yaml",
+      "url": `${realRuleProvidersUrl['ChinaMax']}`,
       "path": "./rules/ChinaMax.yaml",
       "interval": 86400
     },
@@ -68,7 +103,7 @@ const ruleAndProviders = {
       "type": "http",
       "behavior": "domain",
       "format": "yaml",
-      "url": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/ChinaMax/ChinaMax_Domain.yaml",
+      "url": `${realRuleProvidersUrl['ChinaMax_Domain']}`,
       "path": "./rules/ChinaMax_Domain.yaml",
       "interval": 86400
     },
@@ -76,7 +111,7 @@ const ruleAndProviders = {
       "type": "http",
       "behavior": "ipcidr",
       "format": "yaml",
-      "url": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/ChinaMax/ChinaMax_IP.yaml",
+      "url": `${realRuleProvidersUrl['ChinaMax_IP']}`,
       "path": "./rules/ChinaMax_IP.yaml",
       "interval": 86400
     },
@@ -84,7 +119,7 @@ const ruleAndProviders = {
       "type": "http",
       "behavior": "classical",
       "format": "yaml",
-      "url": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/OpenAI/OpenAI.yaml",
+      "url": `${realRuleProvidersUrl['OpenAI']}`,
       "path": "./rules/OpenAI.yaml",
       "interval": 86400
     }
@@ -179,9 +214,7 @@ function findRegionProxyGroups(config, minProxyCount = 5) {
     .map((proxy) => proxy.name)
     .reduce((groups, item) => {
       //去除末尾和开头的数字和其他字符
-      let groupName = item
-        .replace(/(?:\d+|[\s-]+\d+|\s+[Vv]+\d+)$/g, "")
-        .replace(/^(?:\d+[\s-]+|\d+|[Vv]+\d+\s+)/g, "");
+      let groupName = findGroupName(item);
       let proxyNames = groups[groupName] || [];
       groups[groupName] = [...proxyNames, item];
       return groups;
