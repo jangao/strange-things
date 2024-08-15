@@ -23,10 +23,13 @@ const findGroupName = (groupName) => {
   }
   return groupName;
 }
-// github or cnd
+// github or cdn
 const ruleProvidersUrlSrc = "github"
 const ruleProvidersUrl = {
   "github": {
+    "Jetbrains": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Jetbrains/Jetbrains.yaml",
+    "Microsoft": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Microsoft/Microsoft.yaml",
+    "Mozilla": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Mozilla/Mozilla.yaml",
     "Global": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Global/Global.yaml",
     "Global_Domain": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Global/Global_Domain.txt",
     "ChinaMax_No_Resolve": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ChinaMax/ChinaMax_No_Resolve.yaml",
@@ -36,6 +39,9 @@ const ruleProvidersUrl = {
     "OpenAI": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/OpenAI/OpenAI.yaml"
   },
   "cdn": {
+    "Jetbrains": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Jetbrains/Jetbrains.yaml",
+    "Microsoft": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Microsoft/Microsoft.yaml",
+    "Mozilla": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Mozilla/Mozilla.yaml",
     "Global": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Global/Global.yaml",
     "Global_Domain": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Global/Global_Domain.txt",
     "ChinaMax_No_Resolve": "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/ChinaMax/ChinaMax_No_Resolve.yaml",
@@ -50,11 +56,9 @@ const realRuleProvidersUrl = ruleProvidersUrl[ruleProvidersUrlSrc]
 
 const ruleAndProviders = {
   "rules": [
-    "DOMAIN-SUFFIX,microsoft.com,DIRECT",
-    "DOMAIN-SUFFIX,msn.com,DIRECT",
-    "DOMAIN-SUFFIX,msn.cn,DIRECT",
-    "DOMAIN-SUFFIX,live.com,DIRECT",
-    "DOMAIN-SUFFIX,cdntips.net,DIRECT",
+    "RULE-SET,Jetbrains,DIRECT,no-resolve",
+    "RULE-SET,Microsoft,DIRECT,no-resolve",
+    "RULE-SET,Mozilla,DIRECT,no-resolve",
     "RULE-SET,ChinaMax,DIRECT",
     "RULE-SET,ChinaMax_No_Resolve,DIRECT,no-resolve",
     "RULE-SET,ChinaMax_Domain,DIRECT,no-resolve",
@@ -67,6 +71,30 @@ const ruleAndProviders = {
     "MATCH,节点选择"
   ],
   "rule-providers": {
+    "Jetbrains": {
+      "type": "http",
+      "behavior": "classical",
+      "format": "yaml",
+      "url": `${realRuleProvidersUrl['Jetbrains']}`,
+      "path": "./rules/Jetbrains.yaml",
+      "interval": 86400
+    },
+    "Microsoft": {
+      "type": "http",
+      "behavior": "classical",
+      "format": "yaml",
+      "url": `${realRuleProvidersUrl['Microsoft']}`,
+      "path": "./rules/Microsoft.yaml",
+      "interval": 86400
+    },
+    "Mozilla": {
+      "type": "http",
+      "behavior": "classical",
+      "format": "yaml",
+      "url": `${realRuleProvidersUrl['Mozilla']}`,
+      "path": "./rules/Mozilla.yaml",
+      "interval": 86400
+    },
     "Global": {
       "type": "http",
       "behavior": "classical",
